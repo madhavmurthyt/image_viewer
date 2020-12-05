@@ -65,6 +65,7 @@ export default class Home extends Component {
     };
 
     // Fetch user's post by making an API call
+    // Fetch access token from session
     async componentDidMount() {
         if (!Config.api.mock) {
             let accessToken = window.sessionStorage.getItem("access-token");
