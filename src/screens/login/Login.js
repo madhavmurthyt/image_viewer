@@ -1,103 +1,70 @@
 import React, { Component } from 'react';
-import Header from "../../common/header/Header";
+import { Card, CardActions, CardContent, Typography, Button, FormControl, FormHelperText, Input, InputLabel } from '@material-ui/core';
+import PageWithHeader from '../../common/header/PageWithHeader';
+import Config from '../../common/config';
 import './Login.css';
-import Card from "@material-ui/core/Card";
-import FormControl from '@material-ui/core/FormControl';
-import InputLabel from '@material-ui/core/InputLabel';
-import Input from '@material-ui/core/Input';
-import Button from '@material-ui/core/Button';
-import FormHelperText from '@material-ui/core/FormHelperText';
-import { Redirect } from 'react-router-dom';
 
-class Login extends Component {
-
+export default class Login extends Component {
     constructor() {
         super();
         this.state = {
-            usernameRequired: "dispNone",
-            passwordRequired: "dispNone",
-            incorrectUsernamePasswordMessage: "dispNone",
-            username: "",
-            password: "",
-            isLoggedIn: false,
-        };
-    }
-
-    /**
-     * Function that handles any changes in the username field and updates state accordingly
-     */
-    inputUsernameChangeHandler = (e) => {
-        this.setState({ username: e.target.value });
-    }
-
-    /**
-     * Function that handles any changes in the password field and updates state accordingly
-     */
-    inputPasswordChangeHandler = (e) => {
-        this.setState({ password: e.target.value });
-    }
-
-    /**
-     * Function that handles what happens when we click the login button
-     */
-    loginClickHandler = () => {
-        //Setting credentials in the login handler
-        let username = "user";
-        let password = "password";
-
-        let accessToken = "IGQVJYaFZA5WGpsNWtUeTJjc1o0Q3o5dDBjVF92Nl9qQmdGT3VDTlIwRWtlRWpoLS1wQTl6VG1GOTlHN3lCdHdZAZAkE0QzdPMnRtT21RVVBkYWpCdlFPN3U3YkthRnpDMnNQU2VibFBR";
-        if (this.state.username === "" || this.state.password === "") {
-            // The usernameRequired and passwordRequired fields are used when we want to store the class to be assigned 
-            this.state.username === "" ? this.setState({ usernameRequired: "dispBlock" }) : this.setState({ usernameRequired: "dispNone" });
-            this.state.password === "" ? this.setState({ passwordRequired: "dispBlock" }) : this.setState({ passwordRequired: "dispNone" });
-            this.setState({ incorrectUsernamePasswordMessage: "dispNone" });
-        } else if (this.state.username === username && this.state.password === password) {
-            // Setting token in session storage
-            sessionStorage.setItem("access-token", accessToken);
-            // Setting state so as to check and route to home page if login is successful. 
-            this.setState({ 
-                isLoggedIn: true,
-            });
-        } else {
-            // In case the username and password are incorrect
-            this.setState({ incorrectUsernamePasswordMessage: "dispBlock" });
+            usernameVal: "",
+            passwordVal: "",
+            usernameRequiredText: "hide",
+            passwordRequiredText: "hide",
+            incorrectLoginInfoText: "hide"
         }
 
+        /*****************************************************************************
+         * Username, Password, Access Token & Mocking can be setup or enabled in
+         *  ../../common/Config.js
+         *****************************************************************************/
     }
 
+    getUsernameOnChange = (e) => this.setState({ usernameVal: e.target.value, usernameRequiredText: "hide" });
+    getPasswordOnChange = (e) => this.setState({ passwordVal: e.target.value, passwordRequiredText: "hide" });
+    
+    //Verify Input Credentials & log the user in if the supplied credentials are OK
+    loginUserOnBtnClick = (e) => {
+        (!this.state.usernameVal) ? this.setState({ usernameRequiredText: "show" }) : this.setState({ usernameRequiredText: "hide" });
+        (!this.state.passwordVal) ? this.setState({ passwordRequiredText: "show" }) : this.setState({ passwordRequiredText: "hide" });
+        (this.state.usernameVal !== "" && this.state.passwordVal !== "" && (this.state.usernameVal !== Config.login.username || this.state.passwordVal !== Config.login.password)) ? this.setState({ incorrectLoginInfoText: "show" }) : this.redirectUserToHomePage();
+    }
+
+    // Redirect User to Home Page on Successful Login
+    redirectUserToHomePage = () => {
+        this.setState({ incorrectLoginInfoText: "hide" });
+        window.sessionStorage.setItem('access-token', Config.auth["access-token"]);
+        this.props.history.push('/home/');
+    }
     render() {
         return (
-            <div>
-                {this.state.isLoggedIn === true ?
-                <Redirect to= "/home"/>
-                :
-                    <div>
-                        <Header></Header>
-                        <Card className="login-card">
-                            <p className="login-header">LOGIN</p>
-                            <FormControl required>
-                                <InputLabel htmlFor="username">Username</InputLabel>
-                                <Input id="username" type="text" username={this.state.username} onChange={this.inputUsernameChangeHandler} value = {this.state.username}/>
-                                <FormHelperText className={this.state.usernameRequired}><span className="red">required</span></FormHelperText>
-                            </FormControl>
-                            <br />
-                            <br />
-                            <FormControl required>
-                                <InputLabel htmlFor="password">Password</InputLabel>
-                                <Input id="password" type="password" password={this.state.password} onChange={this.inputPasswordChangeHandler} value = {this.state.password}/>
-                                <FormHelperText className={this.state.passwordRequired}><span className="red">required</span></FormHelperText>
-                            </FormControl>
-                            <br />
-                            <br />
-                            <FormHelperText className={this.state.incorrectUsernamePasswordMessage}><span className="red" style={{ fontSize: "14px" }}>Incorrect username and/or password</span></FormHelperText>
-                            <br />
-                            <Button variant="contained" color="primary" onClick={this.loginClickHandler} className="login-btn">LOGIN</Button>
-                        </Card>
-                    </div>
-                }
-            </div>
+            <PageWithHeader title="Image Viewer">
+                <Card className="login-card" >
+                    <CardContent>
+                        <FormControl margin="normal" size="medium" variant="standard">
+                            <Typography className="login-title" variant="h5" component="h5" color="textPrimary"
+                            >LOGIN</Typography>
+                        </FormControl>
+                        <FormControl fullWidth required margin="normal" size="medium" variant="standard">
+                            <InputLabel htmlFor="ip-uname">Username</InputLabel>
+                            <Input id="ip-uname" type="text" onChange={this.getUsernameOnChange} />
+                            <FormHelperText error className={this.state.usernameRequiredText}>required</FormHelperText>
+                        </FormControl>
+                        <FormControl fullWidth required margin="normal" size="medium" variant="standard">
+                            <InputLabel htmlFor="ip-passwd">Password</InputLabel>
+                            <Input id="ip-passwd" type="password" onChange={this.getPasswordOnChange} />
+                            <FormHelperText error className={this.state.passwordRequiredText}>required</FormHelperText>
+                        </FormControl>
+                        <FormHelperText error className={this.state.incorrectLoginInfoText}>Incorrect username and/or password</FormHelperText>
+                    </CardContent>
+                    <CardActions>
+                        <FormControl margin="normal" size="medium" variant="standard">
+                            <Button variant="contained" color="primary" id="btn-login" onClick={this.loginUserOnBtnClick}>LOGIN</Button>
+                        </FormControl>
+                    </CardActions>
+                </Card>
+            </PageWithHeader>
         );
     }
 }
-
-export default Login;

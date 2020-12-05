@@ -1,132 +1,252 @@
 import React, { Component } from 'react';
+import './Header.css';
+import InputBase from '@material-ui/core/InputBase';
 import SearchIcon from '@material-ui/icons/Search';
-import Input from '@material-ui/core/Input'
-import IconButton from '@material-ui/core/IconButton'
+import { fade } from '@material-ui/core/styles';
+import { withStyles } from '@material-ui/core/styles';
+import IconButton from '@material-ui/core/IconButton';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import { Link } from 'react-router-dom';
-import profileImage from "../../assets/upgrad.svg"
-import { MenuList } from '@material-ui/core';
-import { withStyles } from '@material-ui/core/styles';
-import { Redirect } from 'react-router-dom'
-
-import "./Header.css";
 
 
-// Custom Styles to over ride material ui default styles
-const styles = (theme => ({
-    menuItems: {  //Style for the menu items 
-        "text-decoration": "none",
-        "color": "black",
-        "text-decoration-underline": "none",
+const styles = (theme) => ({
+ 
+    search: {
+      position: 'relative',
+      borderRadius: '4px',
+      backgroundColor: fade(theme.palette.common.white, 0.15),
+      '&:hover': {
+        backgroundColor: '#c0c0c0',
+      },
+      marginRight: theme.spacing(2),
+      marginLeft: 0,
+      width: '100%',
+      [theme.breakpoints.up('sm')]: {
+        marginLeft: theme.spacing(3),
+        width: '300px',
+      },
+      float: 'right'
     },
-    searchText: {  //seach text styling 
-        "position": "relative",
-        "width": "100%",
+    searchIcon: {
+      padding: theme.spacing(0, 2),
+      height: '100%',
+      position: 'absolute',
+      pointerEvents: 'none',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
     },
-    menuList: { //Styling for the menulist component
-        "width": "150px",
-        padding: "0px"
-
+    inputRoot: {
+      color: 'inherit',
+    },
+    inputInput: {
+      padding: theme.spacing(1, 1, 1, 0),
+      paddingLeft: `calc(1em + ${theme.spacing(4)}px)`,
+      transition: theme.transitions.create('width'),
+      width: '100%',
+      [theme.breakpoints.up('md')]: {
+        width: '20ch',
+      },
+    },
+    bg: {
+      
+      backgroundColor: '#b3b3b3 !important',
+      color: 'black !important',
+      padding: '10px',
+      borderRadius : '10px',
+      height:'90px'
     }
+  
 
-}))
+  });
 
 
+  
+class Header extends Component{
+  
 
-class Header extends Component {
-    constructor() {
+
+    constructor(){
         super();
-        this.state = {
-            menuIsOpen: false,
-            isLoggedIn: true,
-        };
-
-    }
-
-    //This method is to handle the open menu when profile button is clicked
-    openMenu = () => this.setState({
-        ...this.state,
-        menuIsOpen: !this.state.menuIsOpen
-    })
-    //This method is called when the profile icon is clicked to open the menu
-    profileButtonClicked = (event) => {
-        this.state.anchorEl ? this.setState({ anchorEl: null }) : this.setState({ anchorEl: event.currentTarget });
-        this.openMenu();
-    };
-
-    // This method is called when text is entered into search input, 
-    //this inturn calls method onSearchTextChange of Home component and passes the text entered in the search input
-    onSearchChangeHandler = (event) => {
-        this.props.onSearchTextChange(event.target.value);
-    }
-
-    //This method is called when log out is clicked in the menu 
-    //The method clears the session deatils like access-token and changes the logged to false
-    onLogOutClicked = (event) => {
-        sessionStorage.removeItem("access-token"); //Clearing access-token
-        this.setState({
-            isLoggedIn:false
-        })  
-    }
-
-    // This is called everytime the page renders so that to check if the user is not logged to redirect to login page
-    redirectToLogin = () => {
-        if (!this.state.isLoggedIn) {
-           return <Redirect to = "/"/>
+        this.state={
+            posts : [],
+            search: '',
+            photo : null,
+            anchorEl : null,
+            searchInput : "",
+         
+            
+       
         }
     }
 
-    render() {
+    componentDidMount() {
+      // Get profile picture
+      let data = null;
+      let xhr = new XMLHttpRequest();
+      let that = this;
+      
+     if(this.props.loggedIn==="true"){
+      xhr.addEventListener("readystatechange", function () {
+          if (this.readyState === 4) {
+              that.setState({
+                  photo: JSON.parse(this.responseText).data.profile_picture
+              });
+          }
+      });
+      xhr.open("GET", this.props.baseUrl+"?access_token="+sessionStorage.getItem("access-token"));
+      xhr.setRequestHeader("Cache-Control", "no-cache");
+      xhr.send(data);
 
-        //custom Styles are stored in classes
-        const { classes } = this.props;
-        return (
+      // Get posts 
+      let postData = null;
+      let xhrPosts = new XMLHttpRequest();
+      xhrPosts.addEventListener("readystatechange", function () {
+          if (this.readyState === 4) {
+              that.setState({
+                  posts :JSON.parse(this.responseText).data
+          
+              });
+          }
+      });
+     
+      xhrPosts.open("GET", this.props.baseUrl+"/media/recent?access_token="+sessionStorage.getItem("access-token"));
+      xhrPosts.setRequestHeader("Cache-Control", "no-cache");
+      xhrPosts.send(postData);
+
+      
+    }
+  }
+    
+  
+    updateSearch = e => {
+        this.setState({ search : e.target.value });
+      };
+
+      handleClick = (event) => {
+         this.setState({anchorEl : event.currentTarget });
+         
+      };
+    
+      handleClose = () => {
+        this.setState({anchorEl : null });
+      };
+    
+     /*
+   
+      profilePageHandler =(e) => {
+      }
+
+      LogoutHandler =()=>{
+        sessionStorage.removeItem("access-token");
+
+      } */
+
+
+    render(){
+    const { classes } = this.props;
+     
+     
+        return(
+          
             <div>
-                {/* this is called everytime the page reloads to check if the user is logged out if yes the redirects to login page */}
-                {this.redirectToLogin()}
                 <header className="app-header">
-                    <a href='/home' id="app-logo">Image Viewer</a>
-                    {this.props.showSearchBox ?                 //checking if the showSearchBox is true,only then it is shown  
-                        <span className="header-searchbox">
-                            <SearchIcon id="search-icon"></SearchIcon>
-                            <Input className={classes.searchText} placeholder="Search…" disableUnderline={true} onChange={this.onSearchChangeHandler} />
-                        </span>
-                        : <span className="header-searchbox-false" /> //To maintain the design stability
-                    }
-                    {this.props.showProfileIcon ?   // checking if the showSearchBox is true,only then it is shown 
-                        <span>
-                            <IconButton id="profile-icon" onClick={event => this.profileButtonClicked(event)}>
-                                <img src={this.props.profile_picture} alt={profileImage} id="profile-picture" />
-                            </IconButton>
-                            <Menu id="profile-menu" anchorEl={this.state.anchorEl} open={this.state.menuIsOpen} onClose={this.profileButtonClicked}>
-                                <MenuList className={classes.menuList}>
-                                    {this.props.showMyAccount === true ?
-                                    <div>
-                                        <Link to={"/profile"} className={classes.menuItems} underline="none" color={"default"}>
-                                            <MenuItem className={classes.menuItems} onClick={this.onMyAccountClicked} disableGutters={false}>My account</MenuItem>
-                                        </Link>
-                                    
-                                    <div className="horizontal-line"> </div>
-                                    </div>
-                                    : ""
-                                    }
-                                        <MenuItem className="menu-items" onClick={this.onLogOutClicked}>Logout</MenuItem>
-                                </MenuList>
+                   <span className="side-logo">Image Viewer</span>
+                   
+                    
+                   
+                    {this.props.loggedIn ==="true"?
+                       <div className="after-login">
+                         <IconButton style={{padding :'0'}} onClick={this.handleClick}>  
+                          
+                            <img src={this.state.photo} alt=""
+                            style={{width: 40, height: 40, borderRadius: 40/2}} />
+                          </IconButton>
+                         
+                            <Menu
+                                className="simple-menu"
+                                elevation={0}
+                                getContentAnchorEl={null}
+                                anchorEl={this.state.anchorEl}
+                                anchorOrigin={{
+                                  vertical: 'bottom',
+                                  horizontal: 'center',
+                                }}
+                                transformOrigin={{
+                                  vertical: 'top',
+                                  horizontal: 'center',
+                                }}
+                                
+                                keepMounted
+                                open={Boolean(this.state.anchorEl)}
+                                onClose={this.handleClose}>
+                              <div className={classes.bg}>
+                              {this.props.showSearchTab === "true" ?
+                                 <div> <MenuItem onClose={this.handleClose} onClick={this.profilePageHandler}>
+                                   <Link to={"/profile" } loggedin = "true">
+                                      My Account
+                                      </Link>
+                                   </MenuItem><hr/> </div>
+                                :""}
+                              
+                              <MenuItem onClose={this.handleClose}  onClick={this.LogoutHandler}>
+                               <Link to={"/" } loggedin = "false">
+                                Logout
+                                </Link>
+                                </MenuItem>
+                              </div> 
                             </Menu>
-                        </span>
+                           
+                          
+                              
+                        </div>
+                                      :
+                                      ""
+                        
+                    }
+
+                                            
+                     
+
+                   
+                    {this.props.loggedIn === "true" && this.props.showSearchTab === "true"
+                        ?
+                       
+                  
+                        <div className={classes.search}>
+                        <div className={classes.searchIcon}>
+                          <SearchIcon/>
+                          
+                    
+                        </div>
+                      
+                        <InputBase
+                          placeholder="Search…"
+                          classes={{
+                            root: classes.inputRoot,
+                            input: classes.inputInput,
+                          }}
+                          inputProps={{ 'aria-label': 'search' }}
+                          onChange={this.props.searchHandler}
+                          />
+                      </div>
+                     
+                    
+                        
                         : ""
                     }
+                    
+
+                    
 
                 </header>
-
-            </div>
-
-
+         
+          
+   
+           </div>
         )
     }
-
-
 }
 
 export default withStyles(styles)(Header);
