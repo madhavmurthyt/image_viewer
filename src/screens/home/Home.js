@@ -27,6 +27,7 @@ export default class Home extends Component {
 
     // Handler method to filter posts on change in Search Text
     filterPost = (e) => {
+        console.log("this.state.posts "+this.state.posts.filter);
         this.setState({
             searchPattern: e.target.value, userPosts: this.state.posts.filter(
                 (post) => post.caption.includes(e.target.value)
@@ -75,7 +76,6 @@ export default class Home extends Component {
             let response = await fetch(getPostsURI);
             let posts = await response.json();
             posts = posts.data;
-    
             for (let i = 0; i < posts.length; i++) {
                 response = await fetch(getPostDetailsURI.replace('$postId', posts[i].id));
                 let details = await response.json();
@@ -84,6 +84,7 @@ export default class Home extends Component {
                 posts[i].username = details.username;
                 posts[i].timestamp = details.timestamp;
                 posts[i].comments = [];
+                console.log("posts[i].comments  "+posts[i].caption);
                 posts[i].isLiked = false;
                 posts[i].numLikes = Math.round(100 + Math.random() * 100);
             }
@@ -94,7 +95,7 @@ export default class Home extends Component {
             this.setState({userPosts: postsDetails});
             this.setState({posts: postsDetails.filter(x => true)});
         }
-        
+
     }
 
     render() {

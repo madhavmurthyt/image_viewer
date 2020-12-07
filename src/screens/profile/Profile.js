@@ -103,7 +103,7 @@ export default class Profile extends Component {
                                 <Fade in={this.state.open}>
                                     <Box width="60%" display="flex" flexDirection="row" justifyContent="space-evenly" className="modal-content">
                                         <Box m="1%" width="50%" className="image-container" >
-                                            {(this.state.userPost.media_url) ? <PostMedia media={this.state.userPost.media_url} mediaId={this.state.userPost.id} minWidth="350px" minHeight="350px" /> : ""}
+                                            {(this.state.userPost.media_url) ? <PostMedia media={this.state.userPost.media_url} mediaId={this.state.userPost.id}/> : ""}
                                         </Box>
                                         <Box m="2%" width="50%" display="flex" flexDirection="column" justifyContent="left" alignItems="center">
                                             <PostHeader postUser={this.state.userPost.username} postedTime={this.state.userPost.timestamp} />

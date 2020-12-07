@@ -110,7 +110,7 @@ class Header extends Component{
               });
           }
       });
-     
+      console.log("***   "+this.props.baseUrl+"/media/recent?access_token="+sessionStorage.getItem("access-token"))
       xhrPosts.open("GET", this.props.baseUrl+"/media/recent?access_token="+sessionStorage.getItem("access-token"));
       xhrPosts.setRequestHeader("Cache-Control", "no-cache");
       xhrPosts.send(postData);
@@ -200,9 +200,7 @@ class Header extends Component{
                            
                           
                               
-                        </div>
-                                      :
-                                      ""
+                        </div> : ""
                         
                     }
 
